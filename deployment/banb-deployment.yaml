@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banb-deployment
+  labels:
+    app: banb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: banb
+  template:
+    metadata:
+      labels:
+        app: banb
+    spec:
+      containers:
+      - name: banb
+        image: quay.io/nibalizer/bad-app-no-biscuit:latest
+        imagePullPolicy: Always
+        env:
+        - name: DEBUG
+          value: "FALSE"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: banb
+  labels:
+    app: banb
+spec:
+  ports:
+  - port: 3000
+    protocol: TCP
+  selector:
+    app: banb
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: myingress
+spec:
+  rules:
+  - host: nibz-falco-test-2-5290c8c8e5797924dc1ad5d1b85b37c0-0000.us-east.containers.appdomain.cloud
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: banb
+          servicePort: 3000
